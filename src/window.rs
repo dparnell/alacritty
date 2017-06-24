@@ -296,7 +296,7 @@ impl Window {
 
     #[cfg(any(target_os = "linux", target_os = "freebsd"))]
     pub fn get_window_id(&self) -> Option<usize> {
-        use glutin::os::unix::WindowExt;
+        use glutin::winit::os::unix::WindowExt;
 
         match self.window.get_xlib_window() {
             Some(xlib_window) => Some(xlib_window as usize),
