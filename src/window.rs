@@ -25,6 +25,9 @@ pub enum Error {
     /// Error creating the window
     ContextCreation(glutin::CreationError),
 
+    /// Error creating the window
+    ContextCreation(glutin::CreationError),
+
     /// Error manipulating the rendering context
     Context(glutin::ContextError),
 }
@@ -156,10 +159,19 @@ impl Display for Error {
             Error::ContextCreation(ref err) => {
                 write!(f, "Error creating GL context; {}", err)
             },
+            Error::ContextCreation(ref err) => {
+                write!(f, "Error creating GL context; {}", err)
+            },
             Error::Context(ref err) => {
                 write!(f, "Error operating on render context; {}", err)
             },
         }
+    }
+}
+
+impl From<winit::CreationError> for Error {
+    fn from(val: winit::CreationError) -> Error {
+        Error::WindowCreation(val)
     }
 }
 
@@ -190,11 +202,11 @@ impl Window {
         let window = ::glutin::GlWindow::new(window, context, &event_loop)?;
 
         /// Set OpenGL symbol loader
-        gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+        gl::load_with(|symbol| context.get_proc_address(symbol) as *const _);
 
         /// Make the context current so OpenGL operations can run
         unsafe {
-            window.make_current()?;
+            context.make_current()?;
         }
 
         let window = Window {
