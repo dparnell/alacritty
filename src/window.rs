@@ -40,7 +40,12 @@ type Result<T> = ::std::result::Result<T, Error>;
 /// Wraps the underlying windowing library to provide a stable API in Alacritty
 pub struct Window {
     event_loop: EventsLoop,
+<<<<<<< HEAD
     window: glutin::GlWindow,
+=======
+    window: winit::Window,
+    pub context: glutin::Context,
+>>>>>>> Fix context resize issue
     cursor_visible: bool,
 }
 
