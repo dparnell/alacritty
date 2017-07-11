@@ -435,10 +435,10 @@ impl de::Deserialize for ModeWrapper {
     }
 }
 
-struct MouseButton(::glutin::winit::MouseButton);
+struct MouseButton(::glutin::MouseButton);
 
 impl MouseButton {
-    fn into_inner(self) -> ::glutin::winit::MouseButton {
+    fn into_inner(self) -> ::glutin::MouseButton {
         self.0
     }
 }
@@ -460,12 +460,12 @@ impl de::Deserialize for MouseButton {
                 where E: de::Error,
             {
                 match value {
-                    "Left" => Ok(MouseButton(::glutin::winit::MouseButton::Left)),
-                    "Right" => Ok(MouseButton(::glutin::winit::MouseButton::Right)),
-                    "Middle" => Ok(MouseButton(::glutin::winit::MouseButton::Middle)),
+                    "Left" => Ok(MouseButton(::glutin::MouseButton::Left)),
+                    "Right" => Ok(MouseButton(::glutin::MouseButton::Right)),
+                    "Middle" => Ok(MouseButton(::glutin::MouseButton::Middle)),
                     _ => {
                         if let Ok(index) = u8::from_str(value) {
-                            Ok(MouseButton(::glutin::winit::MouseButton::Other(index)))
+                            Ok(MouseButton(::glutin::MouseButton::Other(index)))
                         } else {
                             Err(E::invalid_value(Unexpected::Str(value), &self))
                         }
@@ -590,7 +590,7 @@ impl de::Deserialize for RawBinding {
                 let mut action: Option<::input::Action> = None;
                 let mut mode: Option<TermMode> = None;
                 let mut not_mode: Option<TermMode> = None;
-                let mut mouse: Option<::glutin::winit::MouseButton> = None;
+                let mut mouse: Option<::glutin::MouseButton> = None;
                 let mut command: Option<CommandWrapper> = None;
 
                 use ::serde::de::Error;
