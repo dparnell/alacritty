@@ -17,9 +17,9 @@
 //! CoreText is used on Mac OS.
 //! FreeType is used on everything that's not Mac OS.
 //! Eventually, ClearType support will be available for windows
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
 extern crate fontconfig;
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
 extern crate freetype;
 
 #[cfg(target_os = "macos")]
@@ -30,6 +30,9 @@ extern crate core_foundation;
 extern crate core_foundation_sys;
 #[cfg(target_os = "macos")]
 extern crate core_graphics;
+
+#[cfg(target_os = "windows")]
+extern crate dwrote;
 
 extern crate euclid;
 extern crate libc;
@@ -46,9 +49,9 @@ use std::fmt;
 use std::sync::atomic::{AtomicUsize, ATOMIC_USIZE_INIT, Ordering};
 
 // If target isn't macos, reexport everything from ft
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
 mod ft;
-#[cfg(not(target_os = "macos"))]
+#[cfg(not(any(target_os = "windows", target_os = "macos")))]
 pub use ft::{FreeTypeRasterizer as Rasterizer, Error};
 
 // If target is macos, reexport everything from darwin
@@ -56,6 +59,12 @@ pub use ft::{FreeTypeRasterizer as Rasterizer, Error};
 mod darwin;
 #[cfg(target_os = "macos")]
 pub use darwin::*;
+
+// If target is windows, reexport everything from dwrite
+#[cfg(target_os = "windows")]
+mod dwrite;
+#[cfg(target_os = "windows")]
+pub use dwrite::{DwroteRasterizer as Rasterizer, Error};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct FontDesc {
