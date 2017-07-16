@@ -278,7 +278,7 @@ impl Window {
         }
     }
 
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(any(target_os = "linux", target_os = "freebsd"))]
     pub fn get_window_id(&self) -> Option<usize> {
         use glutin::os::unix::WindowExt;
 
@@ -289,6 +289,11 @@ impl Window {
     }
 
     #[cfg(target_os = "macos")]
+    pub fn get_window_id(&self) -> Option<usize> {
+        None
+    }
+
+    #[cfg(target_os = "windows")]
     pub fn get_window_id(&self) -> Option<usize> {
         None
     }
