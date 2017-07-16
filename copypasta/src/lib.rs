@@ -75,5 +75,5 @@ pub use macos::{Clipboard, Error};
 
 #[cfg(target_os = "windows")]
 mod windows;
-#[cfg(target_os = "macos")]
+#[cfg(target_os = "windows")]
 pub use windows::{Clipboard, Error};
