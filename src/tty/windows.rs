@@ -40,6 +40,7 @@ pub fn process_should_exit() -> bool {
 
 /// Create a new process and return a handle to interact with it.
 pub fn new<T: ToWinsize>(config: &Config, options: &Options, size: T, window_id: Option<usize>) -> Pty {
+    // TODO: start the shell process
 }
 
 
