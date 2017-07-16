@@ -8,6 +8,9 @@ FlameGraph
 # vim temporary files
 *.swp
 
+# emacs temp files
+*~
+
 # other ignores
 *.DS_Store
 =======
