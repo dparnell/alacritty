@@ -994,6 +994,7 @@ impl Config {
     /// 2. $XDG_CONFIG_HOME/alacritty.yml
     /// 3. $HOME/.config/alacritty/alacritty.yml
     /// 4. $HOME/.alacritty.yml
+    #[cfg(not(target_os = "windows"))]
     pub fn installed_config() -> Option<Cow<'static, Path>> {
         // Try using XDG location by default
         ::xdg::BaseDirectories::with_prefix("alacritty")
@@ -1022,12 +1023,42 @@ impl Config {
             .map(|path| path.into())
     }
 
+    #[cfg(target_os = "windows")]
+    pub fn installed_config() -> Option<Cow<'static, Path>> {
+        if let Ok(home) = env::var("HOME") {
+            // Fallback path: $HOME/.config/alacritty/alacritty.yml
+            let fallback = PathBuf::from(&home).join(".config/alacritty/alacritty.yml");
+            if fallback.exists() {
+                return Some(fallback);
+            }
+            // Fallback path: $HOME/.alacritty.yml
+            let fallback = PathBuf::from(&home).join(".alacritty.yml");
+            if fallback.exists() {
+                return Some(fallback);
+            }
+        }
+    }
+
+    #[cfg(not(target_os = "windows"))]
     pub fn write_defaults() -> io::Result<Cow<'static, Path>> {
         let path = ::xdg::BaseDirectories::with_prefix("alacritty")
             .map_err(|err| io::Error::new(io::ErrorKind::NotFound, ::std::error::Error::description(&err)))
             .and_then(|p| p.place_config_file("alacritty.yml"))?;
         File::create(&path)?.write_all(DEFAULT_ALACRITTY_CONFIG.as_bytes())?;
         Ok(path.into())
+    }
+
+    #[cfg(target_os = "windows")]
+    pub fn write_defaults() -> io::Result<Cow<'static, Path>> {
+        if let Ok(home) = env::var("HOME") {
+            // Fallback path: $HOME/.alacritty.yml
+            let path = PathBuf::from(&home).join(".alacritty.yml");
+
+            File::create(&path)?.write_all(DEFAULT_ALACRITTY_CONFIG.as_bytes())?;
+            Ok(path.into())
+        } else {
+            Ok(())
+        }
     }
 
     /// Get list of colors
