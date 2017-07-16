@@ -1,15 +1,14 @@
 //! Windows Clipboard dummy implementation
 //!
 
-use std::string::FromUtf8Error;
-
 use super::{Load, Store};
-pub struct Clipboard;
+use std::string::FromUtf8Error;
 
 #[derive(Debug)]
 pub enum Error {
     Utf8(FromUtf8Error),
 }
+
 
 impl ::std::error::Error for Error {
     fn cause(&self) -> Option<&::std::error::Error> {
@@ -33,6 +32,9 @@ impl ::std::fmt::Display for Error {
         }
     }
 }
+
+
+pub struct Clipboard;
 
 
 impl Load for Clipboard {
@@ -66,22 +68,5 @@ impl Store for Clipboard {
         where S: Into<String>
     {
         Ok(())
-    }
-}
-
-impl Clipboard {
-}
-
-#[cfg(test)]
-mod tests {
-    use super::Clipboard;
-    use ::{Load, Store};
-
-    #[test]
-    fn create_clipboard_save_load_contents() {
-        let mut clipboard = Clipboard::new().unwrap();
-        clipboard.store_primary("arst").unwrap();
-        let loaded = clipboard.load_primary().unwrap();
-        assert_eq!("arst", loaded);
     }
 }
