@@ -3,6 +3,8 @@ use std::borrow::Cow;
 use std::collections::VecDeque;
 use std::io::{self, ErrorKind, Write};
 use std::fs::File;
+#[cfg(any(target_os = "linux", target_os = "freebsd", target_os = "macos"))]
+use std::os::unix::io::AsRawFd;
 use std::sync::Arc;
 
 use mio::{self, Events, PollOpt, Ready};
