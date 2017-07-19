@@ -40,7 +40,75 @@ pub fn process_should_exit() -> bool {
 
 /// Create a new process and return a handle to interact with it.
 pub fn new<T: ToWinsize>(config: &Config, options: &Options, size: T, window_id: Option<usize>) -> Pty {
-    // TODO: start the shell process
+    let win = size.to_winsize();
+    let mut buf = [0; 1024];
+
+    let shell = config.shell();
+
+    let initial_command = options.command().unwrap_or(&shell);
+
+    let mut builder = Command::new(initial_command.program());
+    for arg in initial_command.args() {
+        builder.arg(arg);
+    }
+
+    // Setup child stdin/stdout/stderr as slave fd of pty
+    // Ownership of fd is transferred to the Stdio structs and will be closed by them at the end of
+    // this scope. (It is not an issue that the fd is closed three times since File::drop ignores
+    // error on libc::close.)
+    builder.stdin(unsafe { Stdio::from_raw_fd(slave) });
+    builder.stderr(unsafe { Stdio::from_raw_fd(slave) });
+    builder.stdout(unsafe { Stdio::from_raw_fd(slave) });
+
+    // Setup environment
+    builder.env("TERM", "xterm-256color"); // default term until we can supply our own
+    if let Some(window_id) = window_id {
+        builder.env("WINDOWID", format!("{}", window_id));
+    }
+    for (key, value) in config.env().iter() {
+        builder.env(key, value);
+    }
+
+    builder.before_exec(move || {
+        // Create a new process group
+        unsafe {
+            let err = libc::setsid();
+            if err == -1 {
+                die!("Failed to set session id: {}", errno());
+            }
+        }
+
+        set_controlling_terminal(slave);
+
+        // No longer need slave/master fds
+        unsafe {
+            libc::close(slave);
+            libc::close(master);
+        }
+
+        Ok(())
+    });
+
+    // Handle set working directory option
+    if let Some(ref dir) = options.working_dir {
+        builder.current_dir(dir.as_path());
+    }
+
+    match builder.spawn() {
+        Ok(child) => {
+            unsafe {
+                // Set PID for SIGCHLD handler
+                PID = child.id() as _;
+            }
+
+            let pty = Pty { fd: master };
+            pty.resize(size);
+            pty
+        },
+        Err(err) => {
+            die!("Command::spawn() failed: {}", err);
+        }
+    }
 }
 
 
