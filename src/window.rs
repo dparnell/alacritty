@@ -169,6 +169,12 @@ impl Display for Error {
     }
 }
 
+impl From<winit::CreationError> for Error {
+    fn from(val: winit::CreationError) -> Error {
+        Error::WindowCreation(val)
+    }
+}
+
 impl From<glutin::CreationError> for Error {
     fn from(val: glutin::CreationError) -> Error {
         Error::ContextCreation(val)
@@ -196,11 +202,11 @@ impl Window {
         let window = ::glutin::GlWindow::new(window, context, &event_loop)?;
 
         /// Set OpenGL symbol loader
-        gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+        gl::load_with(|symbol| context.get_proc_address(symbol) as *const _);
 
         /// Make the context current so OpenGL operations can run
         unsafe {
-            window.make_current()?;
+            context.make_current()?;
         }
 
         let window = Window {
