@@ -148,6 +148,8 @@ pub struct Mouse {
     pub x: u32,
     pub y: u32,
     pub left_button_state: ElementState,
+    pub middle_button_state: ElementState,
+    pub right_button_state: ElementState,
     pub last_click_timestamp: Instant,
     pub click_state: ClickState,
     pub scroll_px: i32,
@@ -164,6 +166,8 @@ impl Default for Mouse {
             y: 0,
             last_click_timestamp: Instant::now(),
             left_button_state: ElementState::Released,
+            middle_button_state: ElementState::Released,
+            right_button_state: ElementState::Released,
             click_state: ClickState::None,
             scroll_px: 0,
             line: Line(0),
@@ -227,12 +231,12 @@ impl<N: Notify> Processor<N> {
             mouse_config: config.mouse().to_owned(),
             print_events: options.print_events,
             wait_for_event: true,
-            notifier: notifier,
-            resize_tx: resize_tx,
-            ref_test: ref_test,
+            notifier,
+            resize_tx,
+            ref_test,
             mouse: Default::default(),
             selection: None,
-            size_info: size_info,
+            size_info,
             hide_cursor_when_typing: config.hide_cursor_when_typing(),
             hide_cursor: false,
             received_count: 0,
@@ -315,9 +319,9 @@ impl<N: Notify> Processor<N> {
                             processor.ctx.terminal.dirty = true;
                         }
                     },
-                    MouseWheel { delta, phase, .. } => {
+                    MouseWheel { delta, phase, modifiers, .. } => {
                         *hide_cursor = false;
-                        processor.on_mouse_wheel(delta, phase);
+                        processor.on_mouse_wheel(delta, phase, modifiers);
                     },
                     Refresh => {
                         processor.ctx.terminal.dirty = true;

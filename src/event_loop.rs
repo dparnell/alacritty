@@ -6,7 +6,7 @@ use std::fs::File;
 #[cfg(unix)]
 use std::os::unix::io::AsRawFd;
 use std::sync::Arc;
-use std::marker::{PhantomData, Send};
+use std::marker::PhantomData;
 
 use mio::{self, Events, PollOpt, Ready};
 use mio_more::channel::{self, Receiver, Sender};
@@ -46,7 +46,6 @@ pub struct EventLoop<R: io::Read + Send, W: io::Write + Send, T: tty::EventedRW<
     terminal: Arc<FairMutex<Term>>,
     display: display::Notifier,
     ref_test: bool,
-    // FIXME: A possibly better solution is to change the trait (PTY?) to use an associated type
     _r: PhantomData<R>,
     _w: PhantomData<W>,
 }
@@ -59,6 +58,8 @@ pub struct EventLoop<R: io::Read, W: io::Write, T: tty::PTY<R, W>> {
     terminal: Arc<FairMutex<Term>>,
     display: display::Notifier,
     ref_test: bool,
+    _r: PhantomData<R>,
+    _w: PhantomData<W>,
 }
 
 /// Helper type which tracks how much of a buffer has been written.
@@ -198,12 +199,12 @@ where
         let (tx, rx) = channel::channel();
         EventLoop {
             poll: mio::Poll::new().expect("create mio Poll"),
-            pty: pty,
-            tx: tx,
-            rx: rx,
-            terminal: terminal,
-            display: display,
-            ref_test: ref_test,
+            pty,
+            tx,
+            rx,
+            terminal,
+            display,
+            ref_test,
             _r: PhantomData,
             _w: PhantomData,
         }
